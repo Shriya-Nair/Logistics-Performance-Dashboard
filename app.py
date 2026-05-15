@@ -451,4 +451,57 @@ def main():
         
         # Show sample data template info
         with st.expander("📋 Need help with data format?"):
-           
+            st.markdown("""
+            ### Expected Data Formats
+            
+            **Trip Report File should contain:**
+            - `Trip No` (required) - Unique trip identifier
+            - `Client` (required) - Customer name
+            - `Destination` (required) - Delivery location
+            - `Start Date` (required) - Trip start date
+            - `Trip Type` (required) - "Loaded" or "Empty"
+            - `Inv Qty` (optional) - Invoice quantity
+            - `Plant` / `Source` (optional) - Origin plant/source
+            
+            **TAT Data File should contain:**
+            - `Trip No` (required) - Trip identifier
+            - `Date` (required) - Transaction date
+            - `Actual DO Receipt (Mins)` - Time from DO receipt to gate entry
+            - `Actual Gate In(Mins)` - Time from gate entry to loading bay
+            - `Actual Loaded Exit(Mins)` - Time for loading process
+            - `Actual Gate In for Unloading(Mins)` - Time for unloading gate-in
+            - `Actual Unloaded (Mins)` - Time for unloading process
+            - `Client`, `Plant`, `Destination` (optional) - For filtering
+            
+            The system will automatically detect column variations and handle duplicates.
+            """)
+        return
+    
+    # Create tabs based on available data
+    tabs = []
+    if has_trip_data:
+        tabs.append(("🚛 Trip Analysis", "trip"))
+    if has_tat_data:
+        tabs.append(("📊 TAT Report", "tat"))
+    
+    if len(tabs) == 2:
+        tab1, tab2 = st.tabs([t[0] for t in tabs])
+        
+        with tab1:
+            render_trip_tab(st.session_state.trip_data, trip_analytics)
+        
+        with tab2:
+            trip_trip_nos = None
+            if has_trip_data and st.session_state.trip_data is not None:
+                trip_trip_nos = st.session_state.trip_data["Trip No"].unique().tolist()
+            render_tat_tab(st.session_state.tat_data, tat_analytics, trip_trip_nos)
+    
+    elif has_trip_data:
+        render_trip_tab(st.session_state.trip_data, trip_analytics)
+    
+    elif has_tat_data:
+        render_tat_tab(st.session_state.tat_data, tat_analytics)
+
+
+if __name__ == "__main__":
+    main()
